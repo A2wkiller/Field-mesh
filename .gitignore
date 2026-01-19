@@ -1,27 +1,41 @@
-# Compiled class file
-*.class
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
-# Log file
-*.log
+# dependencies
+node_modules/
 
-# BlueJ files
-*.ctxt
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
 
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
+# Native
+ios/
+android/
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
 
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
+# Metro
+.metro-health-check*
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
-replay_pid*
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
 
-# Kotlin Gradle plugin data, see https://kotlinlang.org/docs/whatsnew20.html#new-directory-for-kotlin-data-in-gradle-projects
-.kotlin/
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+.vercel
+
+.rork
