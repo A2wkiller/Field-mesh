@@ -2,7 +2,7 @@ Field Mesh
 
 Offline Disaster, Agriculture & Aid Intelligence System
 
-SmartField is a dual-interface, offline-first mobile application designed for disaster response, agriculture surveys, hospital monitoring, and aid distribution in low-connectivity environments.
+Field Mesh is a dual-interface, offline-first mobile application designed for disaster response, agriculture surveys, hospital monitoring, and aid distribution in low-connectivity environments.
 
 The app is built as a single application with role-based access, allowing field survey teams and HQ command teams to operate on the same data ecosystem—without relying on cloud infrastructure.
 
@@ -163,7 +163,7 @@ bun run start-web
 Note: Some native features may be limited in browser preview.
 
 📂 Project Structure
-SmartField/
+FieldMesh/
 ├── app/                    # App screens (Expo Router)
 │   ├── (tabs)/             # Tab navigation
 │   ├── fieldmesh/          # Field interface
