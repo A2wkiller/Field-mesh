@@ -1,0 +1,3 @@
+## 2026-11-03 - [HQ Dashboard Stats Optimization]
+**Learning:** The dashboard statistics calculation previously executed 13 separate passes (via `reduce` and `filter`) over the `disasterSurveys` array within a single `useMemo` block. While React Native and modern JS engines are fast, such duplicated array traversal (O(13n)) can introduce tangible jank and block the main thread unnecessarily when array sizes grow large on lower-end devices.
+**Action:** When computing multiple derived statistics from a single array in React components, always consolidate the logic into a single iteration pass (e.g., using a single `for...of` loop or a monolithic `reduce`) to maintain O(n) time complexity and prevent redundant memory allocations.
