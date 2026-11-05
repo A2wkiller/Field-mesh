@@ -42,33 +42,51 @@ export default function SmartFieldHQScreen() {
   };
 
   const stats = useMemo(() => {
-    const totalAffected = disasterSurveys.reduce((sum, s) => sum + s.peopleAffected, 0);
-    const totalInjured = disasterSurveys.reduce((sum, s) => sum + s.injured, 0);
-    const totalCritical = disasterSurveys.reduce((sum, s) => sum + s.critical, 0);
-    const totalDead = disasterSurveys.reduce((sum, s) => sum + s.dead, 0);
-    const totalTrapped = disasterSurveys.reduce((sum, s) => sum + s.trapped, 0);
-    const highTrust = disasterSurveys.filter(s => s.trustStatus === 'GREEN').length;
-    const mediumTrust = disasterSurveys.filter(s => s.trustStatus === 'ORANGE').length;
-    const lowTrust = disasterSurveys.filter(s => s.trustStatus === 'RED').length;
-    const avgTrustScore = disasterSurveys.length > 0 
-      ? Math.round(disasterSurveys.reduce((sum, s) => sum + s.trustScore, 0) / disasterSurveys.length)
+    // ⚡ Bolt: Consolidated 14 separate map/filter/reduce loops into a single O(n) pass over disasterSurveys.
+    // This significantly reduces main-thread blocking time as the survey dataset grows, preventing jank on the Command Dashboard.
+    let totalAffected = 0, totalInjured = 0, totalCritical = 0, totalDead = 0, totalTrapped = 0;
+    let highTrust = 0, mediumTrust = 0, lowTrust = 0, totalTrustScore = 0;
+    let inField = 0, inShelter = 0, inHospital = 0, evacuated = 0;
+
+    for (let i = 0; i < disasterSurveys.length; i++) {
+      const s = disasterSurveys[i];
+      totalAffected += s.peopleAffected;
+      totalInjured += s.injured;
+      totalCritical += s.critical;
+      totalDead += s.dead;
+      totalTrapped += s.trapped;
+      totalTrustScore += s.trustScore;
+
+      if (s.trustStatus === 'GREEN') highTrust++;
+      else if (s.trustStatus === 'ORANGE') mediumTrust++;
+      else if (s.trustStatus === 'RED') lowTrust++;
+
+      if (s.locationStatus === 'Field') inField += s.peopleAffected;
+      else if (s.locationStatus === 'Shelter') inShelter += s.peopleAffected;
+      else if (s.locationStatus === 'Hospital') inHospital += s.peopleAffected;
+      else if (s.locationStatus === 'Evacuated') evacuated += s.peopleAffected;
+    }
+
+    const avgTrustScore = disasterSurveys.length > 0
+      ? Math.round(totalTrustScore / disasterSurveys.length)
       : 0;
-    const verifiedAid = aidDistributions.filter(a => a.verified).length;
 
-    const inField = disasterSurveys.reduce((sum, s) => s.locationStatus === 'Field' ? sum + s.peopleAffected : sum, 0);
-    const inShelter = disasterSurveys.reduce((sum, s) => s.locationStatus === 'Shelter' ? sum + s.peopleAffected : sum, 0);
-    const inHospital = disasterSurveys.reduce((sum, s) => s.locationStatus === 'Hospital' ? sum + s.peopleAffected : sum, 0);
-    const evacuated = disasterSurveys.reduce((sum, s) => s.locationStatus === 'Evacuated' ? sum + s.peopleAffected : sum, 0);
+    let verifiedAid = 0;
+    for (let i = 0; i < aidDistributions.length; i++) {
+      if (aidDistributions[i].verified) {
+        verifiedAid++;
+      }
+    }
 
-    return { 
-      totalAffected, 
+    return {
+      totalAffected,
       totalInjured,
-      totalCritical, 
-      totalDead, 
+      totalCritical,
+      totalDead,
       totalTrapped,
-      highTrust, 
+      highTrust,
       mediumTrust,
-      lowTrust, 
+      lowTrust,
       avgTrustScore,
       verifiedAid,
       inField,
