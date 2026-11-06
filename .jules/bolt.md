@@ -1,0 +1,3 @@
+## 2025-02-06 - [Multiple iterations on critical application state]
+**Learning:** React state variables populated from local storage or context (like arrays of surveys) are often computed by chaining `.reduce`, `.map`, or `.filter` in `useMemo` hooks. This can create unexpected N*M traversal bounds and intermediate array allocations when rendering dashboard statistics.
+**Action:** Replace multiple functional array operations in UI data aggregation layers with a single manual `for` loop pass to minimize GC pressure and O(N) multiplier factors, especially critical for offline-first React Native apps that may process large cached payloads.
