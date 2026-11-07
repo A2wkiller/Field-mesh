@@ -1,7 +1,7 @@
 import { router } from "expo-router";
-import { 
-  Shield, 
-  Users, 
+import {
+  Shield,
+  Users,
   MapPin,
   Package,
   AlertTriangle,
@@ -42,33 +42,61 @@ export default function SmartFieldHQScreen() {
   };
 
   const stats = useMemo(() => {
-    const totalAffected = disasterSurveys.reduce((sum, s) => sum + s.peopleAffected, 0);
-    const totalInjured = disasterSurveys.reduce((sum, s) => sum + s.injured, 0);
-    const totalCritical = disasterSurveys.reduce((sum, s) => sum + s.critical, 0);
-    const totalDead = disasterSurveys.reduce((sum, s) => sum + s.dead, 0);
-    const totalTrapped = disasterSurveys.reduce((sum, s) => sum + s.trapped, 0);
-    const highTrust = disasterSurveys.filter(s => s.trustStatus === 'GREEN').length;
-    const mediumTrust = disasterSurveys.filter(s => s.trustStatus === 'ORANGE').length;
-    const lowTrust = disasterSurveys.filter(s => s.trustStatus === 'RED').length;
-    const avgTrustScore = disasterSurveys.length > 0 
-      ? Math.round(disasterSurveys.reduce((sum, s) => sum + s.trustScore, 0) / disasterSurveys.length)
+    // ⚡ Bolt: Consolidated multiple .reduce() and .filter() calls into a single O(N) loop
+    // Expected impact: Eliminates 12 redundant iterations over the disasterSurveys array, improving performance for large datasets.
+    let totalAffected = 0;
+    let totalInjured = 0;
+    let totalCritical = 0;
+    let totalDead = 0;
+    let totalTrapped = 0;
+    let highTrust = 0;
+    let mediumTrust = 0;
+    let lowTrust = 0;
+    let sumTrustScore = 0;
+    let inField = 0;
+    let inShelter = 0;
+    let inHospital = 0;
+    let evacuated = 0;
+
+    for (let i = 0; i < disasterSurveys.length; i++) {
+      const s = disasterSurveys[i];
+      totalAffected += s.peopleAffected;
+      totalInjured += s.injured;
+      totalCritical += s.critical;
+      totalDead += s.dead;
+      totalTrapped += s.trapped;
+
+      if (s.trustStatus === 'GREEN') highTrust++;
+      else if (s.trustStatus === 'ORANGE') mediumTrust++;
+      else if (s.trustStatus === 'RED') lowTrust++;
+
+      sumTrustScore += s.trustScore;
+
+      if (s.locationStatus === 'Field') inField += s.peopleAffected;
+      else if (s.locationStatus === 'Shelter') inShelter += s.peopleAffected;
+      else if (s.locationStatus === 'Hospital') inHospital += s.peopleAffected;
+      else if (s.locationStatus === 'Evacuated') evacuated += s.peopleAffected;
+    }
+
+    const avgTrustScore = disasterSurveys.length > 0
+      ? Math.round(sumTrustScore / disasterSurveys.length)
       : 0;
-    const verifiedAid = aidDistributions.filter(a => a.verified).length;
 
-    const inField = disasterSurveys.reduce((sum, s) => s.locationStatus === 'Field' ? sum + s.peopleAffected : sum, 0);
-    const inShelter = disasterSurveys.reduce((sum, s) => s.locationStatus === 'Shelter' ? sum + s.peopleAffected : sum, 0);
-    const inHospital = disasterSurveys.reduce((sum, s) => s.locationStatus === 'Hospital' ? sum + s.peopleAffected : sum, 0);
-    const evacuated = disasterSurveys.reduce((sum, s) => s.locationStatus === 'Evacuated' ? sum + s.peopleAffected : sum, 0);
+    // ⚡ Bolt: Reduced .filter().length to a single pass loop.
+    let verifiedAid = 0;
+    for (let i = 0; i < aidDistributions.length; i++) {
+      if (aidDistributions[i].verified) verifiedAid++;
+    }
 
-    return { 
-      totalAffected, 
+    return {
+      totalAffected,
       totalInjured,
-      totalCritical, 
-      totalDead, 
+      totalCritical,
+      totalDead,
       totalTrapped,
-      highTrust, 
+      highTrust,
       mediumTrust,
-      lowTrust, 
+      lowTrust,
       avgTrustScore,
       verifiedAid,
       inField,
@@ -173,29 +201,29 @@ export default function SmartFieldHQScreen() {
                   <Text style={styles.locationTitle}>LOCATION STATUS OF AFFECTED PEOPLE</Text>
                 </View>
                 <View style={styles.locationGrid}>
-                  <LocationStatCard 
-                    icon={AlertTriangle} 
-                    title="In Field" 
-                    count={stats.inField} 
-                    color="#FF3B30" 
+                  <LocationStatCard
+                    icon={AlertTriangle}
+                    title="In Field"
+                    count={stats.inField}
+                    color="#FF3B30"
                   />
-                  <LocationStatCard 
-                    icon={Home} 
-                    title="In Shelter" 
-                    count={stats.inShelter} 
-                    color="#FF9800" 
+                  <LocationStatCard
+                    icon={Home}
+                    title="In Shelter"
+                    count={stats.inShelter}
+                    color="#FF9800"
                   />
-                  <LocationStatCard 
-                    icon={Building2} 
-                    title="In Hospital" 
-                    count={stats.inHospital} 
-                    color="#2196F3" 
+                  <LocationStatCard
+                    icon={Building2}
+                    title="In Hospital"
+                    count={stats.inHospital}
+                    color="#2196F3"
                   />
-                  <LocationStatCard 
-                    icon={CheckCircle} 
-                    title="Evacuated" 
-                    count={stats.evacuated} 
-                    color="#4CAF50" 
+                  <LocationStatCard
+                    icon={CheckCircle}
+                    title="Evacuated"
+                    count={stats.evacuated}
+                    color="#4CAF50"
                   />
                 </View>
               </View>
@@ -330,8 +358,8 @@ function LocationStatCard({ icon: Icon, title, count, color }: { icon: any; titl
 
 function SurveyCard({ survey }: { survey: any }) {
   const trustColor = survey.trustStatus === 'GREEN' ? '#4CAF50' : survey.trustStatus === 'ORANGE' ? '#FF9800' : '#FF3B30';
-  const locationColor = survey.locationStatus === 'Field' ? '#FF3B30' : 
-                        survey.locationStatus === 'Shelter' ? '#FF9800' : 
+  const locationColor = survey.locationStatus === 'Field' ? '#FF3B30' :
+                        survey.locationStatus === 'Shelter' ? '#FF9800' :
                         survey.locationStatus === 'Hospital' ? '#2196F3' : '#4CAF50';
 
   return (
