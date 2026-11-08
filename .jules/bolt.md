@@ -1,0 +1,3 @@
+## 2026-11-08 - Array Iteration Performance in React Native Data Processing
+**Learning:** In the React Native codebase for Field Mesh, data aggregation components like the HQ Dashboard may unnecessarily compute stats using chained array methods (e.g. `.reduce` and `.filter`), resulting in O(kn) time complexity where k is the number of passes over the dataset. This overhead becomes significant as dataset sizes scale up on lower-powered mobile devices.
+**Action:** Replaced multiple iterations with single O(n) `for...of` loops that simultaneously compute counts and sums in a single pass. Going forward, prefer single-pass loops over chained array methods for data aggregations that process large datasets on the client.
