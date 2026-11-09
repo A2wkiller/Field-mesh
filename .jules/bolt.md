@@ -1,0 +1,3 @@
+## 2024-11-09 - O(n) Array Consolidation in React Native
+**Learning:** Found an anti-pattern in `useMemo` hooks where an array of objects (`disasterSurveys`) was traversed 13 separate times using `.reduce()` and `.filter()` to calculate different aggregate statistics. While readable, this leads to O(13n) complexity which degrades performance as the survey data grows, especially on mobile devices handling local data.
+**Action:** Always combine multiple aggregation passes over the same dataset into a single O(n) loop (e.g., using `for...of` or a single `.reduce()`) when computing multiple derived stats for a dashboard.
